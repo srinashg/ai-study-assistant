@@ -1,0 +1,84 @@
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #080b12;
+  --nav: #f1f2f4;
+  --blue: #8fb6ff;
+  --blue-hover: #79a7ff;
+  --blue-strong: #356fd6;
+  --blue-ink: #2456ac;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  min-width: 320px;
+  background: var(--background);
+}
+
+body {
+  min-height: 100vh;
+  margin: 0;
+  background: var(--background);
+  color: var(--foreground);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  text-rendering: optimizeLegibility;
+}
+
+button,
+input {
+  font: inherit;
+}
+
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+::selection {
+  background: var(--blue);
+  color: black;
+}
+
+@layer components {
+  .page-container {
+    @apply mx-auto w-full max-w-7xl px-4 py-10 sm:px-6 sm:py-14 lg:px-8 lg:py-16;
+  }
+
+  .surface-card {
+    @apply rounded-2xl border border-black/10 bg-white shadow-[0_16px_50px_rgba(14,25,45,0.07)];
+  }
+
+  .text-input {
+    @apply min-h-14 w-full rounded-xl border border-black/20 bg-white px-4 py-3 text-base text-black outline-none transition placeholder:text-black/35 hover:border-black/40 focus:border-[var(--blue-strong)] focus:ring-4 focus:ring-blue-100;
+  }
+
+  .primary-button,
+  .secondary-button,
+  .button-link {
+    @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-bold text-black transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--blue-strong)] disabled:cursor-not-allowed disabled:opacity-45;
+  }
+
+  .primary-button,
+  .button-link {
+    @apply bg-[var(--blue)] shadow-[0_4px_0_rgba(23,56,112,0.18)] hover:-translate-y-0.5 hover:bg-[var(--blue-hover)] hover:shadow-[0_6px_0_rgba(23,56,112,0.16)] active:translate-y-0 active:shadow-none;
+  }
+
+  .secondary-button {
+    @apply border border-black/15 bg-[var(--nav)] hover:border-black/30 hover:bg-black/[0.07];
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
