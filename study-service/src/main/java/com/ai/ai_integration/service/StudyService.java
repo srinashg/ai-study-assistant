@@ -12,7 +12,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 import org.springframework.web.server.ResponseStatusException;
 
 @Service
@@ -55,7 +54,7 @@ public class StudyService {
         // chatClient builds new chat request > give user prompt to request > calls AI provider >
         // fetches and deserializes response > validates structure and content of response >
         // returns successful StudyResponse object
-        StudyResponse response = requireCompleteResponse(chatClient
+        StudyResponse response = StudyResponseValidator.requireComplete(chatClient
                 .prompt()
                 .user(prompt)
                 .call()
@@ -104,19 +103,5 @@ public class StudyService {
                 record.getCommonMistake(),
                 record.getInterviewQuestion(),
                 record.getCreatedAt());
-    }
-
-    // validates that the StudyResponse object has all required fields populated
-    private StudyResponse requireCompleteResponse(StudyResponse response) {
-        if (response == null
-                || !StringUtils.hasText(response.explanation())
-                || !StringUtils.hasText(response.example())
-                || !StringUtils.hasText(response.commonMistake())
-                || !StringUtils.hasText(response.interviewQuestion())) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_GATEWAY,
-                    "AI provider returned incomplete study material");
-        }
-        return response;
     }
 }
