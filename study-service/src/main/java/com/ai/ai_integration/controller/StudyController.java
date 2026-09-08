@@ -6,8 +6,11 @@ import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Positive;
 
+import com.ai.ai_integration.dto.AgentRequest;
+import com.ai.ai_integration.dto.RagStudyResponse;
 import com.ai.ai_integration.dto.StudyResponse;
 import com.ai.ai_integration.dto.StudyRecordResponse;
+import com.ai.ai_integration.service.AgentService;
 import com.ai.ai_integration.service.RagService;
 import com.ai.ai_integration.service.StudyService;
 
@@ -32,10 +35,12 @@ public class StudyController {
 
     private final StudyService studyService;
     private final RagService ragService;
+    private final AgentService agentService;
 
-    public StudyController(StudyService studyService, RagService ragService) {
+    public StudyController(StudyService studyService, RagService ragService, AgentService agentService) {
         this.studyService = studyService;
         this.ragService = ragService;
+        this.agentService = agentService;
     }
 
     @PostMapping
@@ -65,11 +70,19 @@ public class StudyController {
     // topic is optional: when given, it scopes retrieval to that topic within the notes;
     // when omitted, the whole document is used as context.
     @PostMapping(value = "/rag", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public StudyResponse generateFromSources(
+    public RagStudyResponse generateFromSources(
             @RequestParam("files") List<MultipartFile> files,
             @RequestParam(required = false) String topic,
             @RequestParam(required = false) String difficulty) {
 
         return ragService.generateFromSources(files, topic, difficulty);
+    }
+
+    // Agent mode: the model decides for itself whether to search the student's uploaded notes
+    // (via documentId, from a prior /rag upload) and/or look up past study sessions before answering,
+    // instead of the app forcing retrieval up front.
+    @PostMapping("/agent")
+    public StudyResponse askAgent(@Valid @RequestBody AgentRequest request) {
+        return agentService.answer(request);
     }
 }

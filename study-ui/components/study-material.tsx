@@ -29,16 +29,31 @@ function MaterialCard({ icon, title, children, className = "" }: MaterialCardPro
 }
 
 export function StudyMaterial({ material }: StudyMaterialProps) {
+  const modeLabel =
+    material.mode === "rag"
+      ? "RAG"
+      : material.mode === "agent"
+        ? "Agent"
+        : "Standard";
+
   return (
     <>
       <div className="mb-8 flex flex-col gap-3 border-b border-black/10 pb-6 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="mb-2 text-sm font-bold uppercase tracking-[0.18em] text-[var(--blue-ink)]">Your study guide</p>
           <h1 className="text-3xl font-bold tracking-[-0.045em] sm:text-4xl">{material.topic}</h1>
+          {material.documentId ? (
+            <p className="mt-2 text-xs text-black/55">Document ID: {material.documentId}</p>
+          ) : null}
         </div>
-        <span className="w-fit rounded-full bg-[var(--blue)] px-4 py-2 text-sm font-bold text-black">
-          {material.difficulty}
-        </span>
+        <div className="flex flex-wrap gap-2">
+          <span className="w-fit rounded-full border border-black/15 bg-white px-4 py-2 text-xs font-bold uppercase tracking-[0.08em] text-black/70">
+            {modeLabel}
+          </span>
+          <span className="w-fit rounded-full bg-[var(--blue)] px-4 py-2 text-sm font-bold text-black">
+            {material.difficulty}
+          </span>
+        </div>
       </div>
 
       <div className="grid gap-5 lg:grid-cols-2">

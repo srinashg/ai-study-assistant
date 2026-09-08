@@ -7,7 +7,7 @@ export default function Home() {
       <PageHeading
         eyebrow="Focused learning, on demand"
         title="What do you want to study?"
-        description="Generate a clear explanation, a practical example, a common pitfall, and an interview-ready question for any topic."
+        description="Choose standard mode, upload notes for RAG grounding, or ask the study agent to decide when to use tools for a better answer."
         centered
       />
       <div className="mx-auto max-w-4xl">

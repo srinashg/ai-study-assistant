@@ -1,5 +1,6 @@
 package com.ai.ai_integration.service;
 
+import com.ai.ai_integration.dto.RagStudyResponse;
 import com.ai.ai_integration.dto.StudyResponse;
 import com.ai.ai_integration.entity.StudyRecord;
 import com.ai.ai_integration.repository.StudyRecordRepository;
@@ -28,6 +29,10 @@ import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+/* Important terminology (MUST know!):
+1. embeddings/embedding model
+*/
+
 @Service
 public class RagService {
 
@@ -49,7 +54,7 @@ public class RagService {
         this.studyRecordRepository = studyRecordRepository;
     }
 
-    public StudyResponse generateFromSources(List<MultipartFile> files, String topic, String difficulty) {
+    public RagStudyResponse generateFromSources(List<MultipartFile> files, String topic, String difficulty) {
         // 1. must accept at least one source file
         if (files == null || files.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "At least one source file is required");
@@ -132,7 +137,7 @@ public class RagService {
                 response.interviewQuestion());
         studyRecordRepository.save(record); //repository saves the record to the database
 
-        return response;
+        return RagStudyResponse.of(documentId, response);
     }
 
     // study_records.topic is NOT NULL; since RAG mode has no user-supplied topic, label it by source filenames

@@ -1,6 +1,8 @@
 import type {
+  AgentRequest,
   ApiError,
   PageResponse,
+  RagStudyResponse,
   StudyRecord,
   StudyRequest,
   StudyResponse,
@@ -30,6 +32,41 @@ export async function generateStudyMaterial(
   request: StudyRequest,
 ): Promise<StudyResponse> {
   const response = await fetch("/api/study", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(request),
+  });
+
+  return readResponse<StudyResponse>(response);
+}
+
+export async function generateStudyMaterialFromRag(request: {
+  files: File[];
+  topic?: string;
+  difficulty?: string;
+}): Promise<RagStudyResponse> {
+  const formData = new FormData();
+
+  request.files.forEach((file) => formData.append("files", file));
+
+  if (request.topic?.trim()) {
+    formData.append("topic", request.topic.trim());
+  }
+
+  if (request.difficulty?.trim()) {
+    formData.append("difficulty", request.difficulty.trim());
+  }
+
+  const response = await fetch("/api/study/rag", {
+    method: "POST",
+    body: formData,
+  });
+
+  return readResponse<RagStudyResponse>(response);
+}
+
+export async function askStudyAgent(request: AgentRequest): Promise<StudyResponse> {
+  const response = await fetch("/api/study/agent", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(request),

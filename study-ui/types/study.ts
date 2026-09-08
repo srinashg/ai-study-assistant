@@ -3,6 +3,14 @@ export interface StudyRequest {
   difficulty: string;
 }
 
+export interface AgentRequest {
+  message: string;
+  documentId?: string;
+  difficulty?: string;
+}
+
+export type StudyMode = "standard" | "rag" | "agent";
+
 export interface StudyResponse {
   explanation: string;
   example: string;
@@ -10,12 +18,19 @@ export interface StudyResponse {
   interviewQuestion: string;
 }
 
+export interface RagStudyResponse extends StudyResponse {
+  documentId: string;
+}
+
 export interface StudyRecord extends StudyRequest, StudyResponse {
   id: number;
   createdAt: string;
 }
 
-export interface StudyMaterialView extends StudyRequest, StudyResponse {}
+export interface StudyMaterialView extends StudyRequest, StudyResponse {
+  mode?: StudyMode;
+  documentId?: string;
+}
 
 export interface PageResponse<T> {
   content: T[];
