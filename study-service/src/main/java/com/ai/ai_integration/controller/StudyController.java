@@ -33,6 +33,7 @@ import org.springframework.web.multipart.MultipartFile;
 @RequestMapping("/api/study")
 public class StudyController {
 
+    // main services //
     private final StudyService studyService;
     private final RagService ragService;
     private final AgentService agentService;
@@ -75,6 +76,7 @@ public class StudyController {
             @RequestParam(required = false) String topic,
             @RequestParam(required = false) String difficulty) {
 
+        // what happens in the RagService?
         return ragService.generateFromSources(files, topic, difficulty);
     }
 
@@ -83,6 +85,7 @@ public class StudyController {
     // instead of the app forcing retrieval up front.
     @PostMapping("/agent")
     public StudyResponse askAgent(@Valid @RequestBody AgentRequest request) {
+        // what happens in the AgentService?
         return agentService.answer(request);
     }
 }

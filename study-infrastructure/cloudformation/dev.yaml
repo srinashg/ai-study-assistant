@@ -1,0 +1,26 @@
+AWSTemplateFormatVersion: "2010-09-09"
+
+Description: "AWS infrastructure for AI Study Assistant"
+
+Resources:
+
+  # EC2 security group (firewall)
+  StudySecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Security group for AI Study Assistant
+      Tags:
+        - Key: Name
+          Value: ai-study-assistant-sg
+
+  # EC2 instance (application server)
+  StudyEC2Instance:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: '{{resolve:ssm:/aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-x86_64}}'
+      InstanceType: t3.medium
+      SecurityGroupIds:
+        - !GetAtt StudySecurityGroup.GroupId
+      Tags:
+        - Key: Name
+          Value: ai-study-assistant-server

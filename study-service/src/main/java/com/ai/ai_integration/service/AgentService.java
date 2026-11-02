@@ -14,7 +14,8 @@ public class AgentService {
 
     private static final String DEFAULT_DIFFICULTY = "intermediate";
 
-    private final ChatClient chatClient;
+    // AgentService calls each "worker" to perform their tasks to handle the user's agent request
+    private final ChatClient chatClient; // entry point to the LLM
     private final StudyTools studyTools;
     private final StudyRecordRepository studyRecordRepository;
 

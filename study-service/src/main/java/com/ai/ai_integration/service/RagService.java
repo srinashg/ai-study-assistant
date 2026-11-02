@@ -39,10 +39,11 @@ public class RagService {
     private static final String DEFAULT_DIFFICULTY = "intermediate";
     private static final int TOP_K = 5;
 
-    private final ChatClient chatClient;
-    private final VectorStore vectorStore;
-    private final TokenTextSplitter textSplitter;
-    private final StudyRecordRepository studyRecordRepository;
+    // RagService calls each "worker" to perform their tasks to handle the user's RAG request
+    private final ChatClient chatClient; // entry point to the LLM
+    private final VectorStore vectorStore; // vector database stores embeddings - vectorStore is just the entry point to the vector database
+    private final TokenTextSplitter textSplitter; //splits a large portion of data into smaller chunks
+    private final StudyRecordRepository studyRecordRepository; // interface to persist and retrieve study records from the application database
 
     public RagService(
             ChatClient.Builder chatClientBuilder,
@@ -55,7 +56,6 @@ public class RagService {
     }
 
     public RagStudyResponse generateFromSources(List<MultipartFile> files, String topic, String difficulty) {
-        // 1. must accept at least one source file
         if (files == null || files.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "At least one source file is required");
         }
@@ -63,21 +63,21 @@ public class RagService {
         String resolvedDifficulty = StringUtils.hasText(difficulty) ? difficulty.trim() : DEFAULT_DIFFICULTY;
         boolean topicSpecified = StringUtils.hasText(topic);
 
-        // tagged with a per-request documentId so retrieval only pulls chunks from this upload
+        // takes in all uploaded files > assigns all files to a tracking documentId > adds each file to a sourceDocuments list
         String documentId = UUID.randomUUID().toString();
         List<Document> sourceDocuments = files.stream()
                 .map(file -> toDocument(file, documentId))
                 .toList();
+        // this splits each individual doc into smaller chunks
         List<Document> chunks = textSplitter.apply(sourceDocuments);
         vectorStore.add(chunks);
 
         String resolvedTopic;
         String context;
         if (topicSpecified) {
-            // a topic narrows a large multi-topic document down to the relevant chunks to make the prompt more focused and the response more accurate
             resolvedTopic = topic.trim();
-            // gets K most relevant chunks from uploaded notes based on topic
-            // context is the concatenation of those chunks, separated by "---" to help the LLM distinguish them
+            // PGVector + Postgres performs the similarity search
+            // both user's query and stored document chunks are represented as embedding vectors
             List<Document> relevantChunks = vectorStore.similaritySearch(SearchRequest.builder()
                     .query(resolvedTopic)
                     .topK(TOP_K)
@@ -85,8 +85,6 @@ public class RagService {
                     .build());
             context = relevantChunks.stream().map(Document::getText).collect(Collectors.joining("\n---\n"));
         } else {
-            // if topic not specified, derive a topic from the uploaded files and use all chunks as context
-            // context is the full text - concat of all chunks, separated by "---" to help the LLM distinguish them
             resolvedTopic = deriveTopic(files);
             context = chunks.stream().map(Document::getText).collect(Collectors.joining("\n---\n"));
         }
@@ -140,11 +138,6 @@ public class RagService {
         return RagStudyResponse.of(documentId, response);
     }
 
-    // study_records.topic is NOT NULL; since RAG mode has no user-supplied topic, label it by source filenames
-    /*
-    1. creates topic for files based on filenames, joined by commas (if file has no filename, uses "uploaded notes" instead)
-    2. filename is truncated to 255 characters to fit in database column
-     */
     private String deriveTopic(List<MultipartFile> files) {
         String joined = files.stream()
                 .map(file -> Objects.requireNonNullElse(file.getOriginalFilename(), "uploaded notes"))
@@ -152,7 +145,6 @@ public class RagService {
         return joined.length() > 255 ? joined.substring(0, 255) : joined;
     }
 
-    // Tika auto-detects the file format (PDF, DOCX, TXT, PPTX, HTML, ...) and extracts plain text.
     private Document toDocument(MultipartFile file, String documentId) {
         try (InputStream stream = file.getInputStream()) {
             BodyContentHandler handler = new BodyContentHandler(-1);
