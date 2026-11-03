@@ -1,0 +1,3 @@
+template-file-path: study-infrastructure/cloudformation/dev.yaml
+parameters: {}
+tags: {}
